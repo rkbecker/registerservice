@@ -15,17 +15,22 @@ public class ProductSaveCommand implements ResultCommandInterface<Product> {
 	@Override
 	public Product execute() {
 		if (StringUtils.isBlank(this.apiProduct.getLookupCode())) {
+			System.out.println("Not saving product. Blank lookup code.");
 			return (new Product()).setApiRequestStatus(ProductApiRequestStatus.INVALID_INPUT);
 		}
 		
 		ProductEntity productEntity = this.productRepository.get(this.apiProduct.getId());
 		if (productEntity != null) {
+			System.out.println("Saving existing product. Current count = " + Integer.toString(productEntity.getCount()));
 			this.apiProduct = productEntity.synchronize(this.apiProduct);
+			System.out.println("Saving existing product. Updated count = " + Integer.toString(productEntity.getCount()));
 		} else {
 			productEntity = this.productRepository.byLookupCode(this.apiProduct.getLookupCode());
 			if (productEntity == null) {
 				productEntity = new ProductEntity(this.apiProduct);
+				System.out.println("Saving new product. Current count = " + Integer.toString(productEntity.getCount()));
 			} else {
+				System.out.println("Not saving product. Lookup code already exists.");
 				return (new Product()).setApiRequestStatus(ProductApiRequestStatus.LOOKUP_CODE_ALREADY_EXISTS);
 			}
 		}
@@ -35,6 +40,7 @@ public class ProductSaveCommand implements ResultCommandInterface<Product> {
 			this.apiProduct.setId(productEntity.getId());
 		}
 		
+		System.out.println("Finishing up.");
 		return this.apiProduct;
 	}
 
